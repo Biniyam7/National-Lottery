@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-lotterySchema = Schema({
+lotterySchema = new Schema({
   name: {
     type: String,
     //required: true,
@@ -9,12 +9,14 @@ lotterySchema = Schema({
   },
 
   descripton: String,
-  Prize: [
-    {
-      type: String,
-    },
-  ],
-  drawDate: Date,
+  startDate: {
+    type: Date,
+    required: true,
+  },
+  drawDate: {
+    type: Date,
+    required: true,
+  },
   Status: {
     type: String,
     enum: ["Active", "Expired"],
