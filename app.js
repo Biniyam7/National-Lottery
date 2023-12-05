@@ -10,6 +10,6 @@ app.use(express.json());
 app.use(bodyParser.json());
 connectdb();
 
-app.get("/", (req, res) => res.send("Bini is misogynstic Asshole!"));
+app.get("/", (req, res) => res.send("Bini is misogynistic Asshole!"));
 
 app.listen(port, () => console.log(`Express app running on port ${port}!`));
