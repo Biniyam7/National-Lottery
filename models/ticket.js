@@ -24,6 +24,10 @@ ticketSchema = new Schema({
     type: String,
     enum: ["win", "lose"],
   },
+  isAvailable: {
+    type: Boolean,
+    required: true,
+  },
 });
 ticketSchema.pre("save", function (next) {
   if (this.status === "lose") {
