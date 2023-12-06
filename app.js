@@ -10,6 +10,10 @@ app.use(express.json());
 app.use(bodyParser.json());
 connectdb();
 
+const adminRoute = require("./routes/admin");
+
+app.use("api/admin", adminRoute);
+
 app.get("/", (req, res) => res.send("Bini is misogynistic Asshole!"));
 
 app.listen(port, () =>
