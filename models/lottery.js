@@ -5,7 +5,16 @@ lotterySchema = new Schema({
   name: {
     type: String,
     //required: true,
-    enum: ["Enqutatash", "Tombolla", "Zihon", "Gena", "Edil", "Fetan", "Bingo"],
+    enum: [
+      "Enqutatash",
+      "Tombolla",
+      "Zihon",
+      "Gena",
+      "Edil",
+      "Fetan",
+      "Bingo",
+      "Medebegna",
+    ],
   },
   description: String,
   startDate: {

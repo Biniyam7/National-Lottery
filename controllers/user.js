@@ -172,11 +172,17 @@ module.exports.selectTicket = async (req, res) => {
       res.json({ win, message });
     }
     const count = selectedTickets.length;
-    if (count >= 5) {
+    let maxAvailableTickets = 5;
+    const lottery = await Lottery.findOne({ _id: lotteryId });
+    if (lottery.name === "Medebegna") {
+      maxAvailableTickets = 2;
+    }
+    if (count >= maxAvailableTickets) {
       return res
         .status(400)
         .json({ error: "Ticket not available for selection" });
     }
+
     // const selectedTicket = selectedTickets[selectedTickets.length - 1];
     const selectedTicket = new Ticket({
       number: ticketNumber,
@@ -184,7 +190,7 @@ module.exports.selectTicket = async (req, res) => {
       user: req.user._id,
       purchaseDate: Date.now(),
     });
-    if (count + 1 >= 5) {
+    if (count + 1 >= maxAvailableTickets) {
       selectedTicket.isAvailable = false;
     }
     await selectedTicket.save();
