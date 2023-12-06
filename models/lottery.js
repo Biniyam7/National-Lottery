@@ -7,7 +7,7 @@ lotterySchema = new Schema({
     //required: true,
     enum: ["Enqutatash", "Tombolla", "Zihon", "Gena", "Edil", "Fetan", "Bingo"],
   },
-  descripton: String,
+  description: String,
   startDate: {
     type: Date,
     required: true,

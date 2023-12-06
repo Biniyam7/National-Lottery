@@ -8,8 +8,10 @@ module.exports.addLotteryInfo = async (req, res) => {
 
     const lottery = await Lottery.findOne({ name });
 
-    if (lottery.drawDate) {
-      res.status(400).json({ message: "this lottery already exists!" });
+    if (lottery) {
+      if (lottery.drawDate) {
+        res.status(400).json({ message: "this lottery already exists!" });
+      }
     }
     const newLottery = new Lottery({
       name,
