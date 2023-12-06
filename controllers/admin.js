@@ -2,7 +2,7 @@ const Admin = require("../models/admin");
 const Lottery = require("../models/lottery");
 const Prize = require("../models/prize");
 
-module.exports.addLotteryInfo(async (req, res) => {
+module.exports.addLotteryInfo = async (req, res) => {
   try {
     const { name, description, startDate, drawDate, prize, price } = req.body;
 
@@ -27,10 +27,10 @@ module.exports.addLotteryInfo(async (req, res) => {
     const savePrize = await newPrize.save();
 
     saveLottery.prize = savePrize._id;
-    await savedLottery.save();
+    await saveLottery.save();
     res.status(201).json(saveLottery);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-});
+};
