@@ -7,9 +7,11 @@ module.exports.addLotteryInfo = async (req, res) => {
     const { name, description, startDate, drawDate, prize, price } = req.body;
 
     const lottery = await Lottery.findOne({ name });
-
-    if (lottery.drawDate) {
-      res.status(400).json({ message: "this lottery already exists!" });
+    if (!Object.values(Lottery.schema.path("name").enumValues).includes(name)) {
+      return res.status(400).json({ message: "Invalid lottery name!" });
+    }
+    if (lottery && lottery.drawDate) {
+      return res.status(400).json({ message: "this lottery already exists!" });
     }
     const newLottery = new Lottery({
       name,
@@ -32,5 +34,16 @@ module.exports.addLotteryInfo = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+module.exports.getLotteries = async (req, res) => {
+  try {
+    const lotteries = await Lottery.find();
+    if (lotteries) {
+      res.json({ lotteries });
+    }
+  } catch (error) {
+    return res.status(404).json("no records");
   }
 };
