@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-amountSchmema = new Schema({
+amountSchema = new Schema({
   level: {
     type: Number,
     required: true,
