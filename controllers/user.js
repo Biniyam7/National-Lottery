@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const phoneNumberFormatter = require("../middlewares/phoneNumberFormatter");
 const Ticket = require("../models/ticket");
+const Lottery = require("../models/lottery");
+const Prize = require("../models/prize");
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1d" });
@@ -141,6 +143,34 @@ module.exports.selectTicket = async (req, res) => {
       number: ticketNumber,
       lottery: lotteryId,
     });
+    const lotteryType = await Lottery.findById({ lotteryId });
+
+    if (lotteryType.name == "Fetan") {
+      const randomNumber = Math.random();
+      let win;
+      let message;
+      const prizes = await Prize.find({ lottery: lotteryId });
+
+      if (randomNumber < 0.8) {
+        // 80% probability
+        win = 0;
+        message = "Sorry, you didn't win this time.";
+      } else if (randomNumber < 0.9) {
+        // 10% probability
+        win = 5;
+        message = "Congratulations! You won 5 Birr.";
+      } else if (randomNumber < 0.98) {
+        // 8% probability
+        win = 1000;
+        message = "Wow! You won 1000 Birr.";
+      } else {
+        // 2% probability
+        win = 25000;
+        message = "Jackpot! You won 25,000 Birr";
+      }
+
+      res.json({ win, message });
+    }
     const count = selectedTickets.length;
     if (count >= 5) {
       return res
