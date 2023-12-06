@@ -7,7 +7,6 @@ lotterySchema = new Schema({
     //required: true,
     enum: ["Enqutatash", "Tombolla", "Zihon", "Gena", "Edil", "Fetan", "Bingo"],
   },
-
   descripton: String,
   startDate: {
     type: Date,
@@ -20,6 +19,10 @@ lotterySchema = new Schema({
   Status: {
     type: String,
     enum: ["Active", "Expired"],
+  },
+  prize: {
+    type: Schema.Types.ObjectId,
+    ref: "Prize",
   },
 });
 

@@ -10,6 +10,11 @@ const prizeSchema = new Schema({
     type: Number,
     required: true,
   },
+  lottery: {
+    type: Schema.Types.ObjectId,
+    ref: "Lottery",
+    required: true,
+  },
 });
 
 const Prize = mongoose.model("Prize", prizeSchema);

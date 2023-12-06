@@ -16,11 +16,6 @@ ticketSchema = new Schema({
     type: Number,
     required: true,
   },
-  label: {
-    type: String,
-    enum: ["A", "B", "C", "D", "E"],
-    required: true,
-  },
   purchaseDate: {
     type: Date,
     default: Date.now,
@@ -28,10 +23,6 @@ ticketSchema = new Schema({
   status: {
     type: String,
     enum: ["win", "lose"],
-  },
-  prize: {
-    type: Schema.Types.ObjectId,
-    ref: "Prize",
   },
 });
 ticketSchema.pre("save", function (next) {
