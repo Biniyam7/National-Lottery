@@ -155,7 +155,7 @@ module.exports.selectTicket = async (req, res) => {
 
     const count = selectedTickets.length;
     let maxAvailableTickets = 5;
-    const lottery = await Lottery.findById({ lotteryId });
+    const lottery = await Lottery.findById({ first_name });
     if (lottery.name === "Medebegna") {
       maxAvailableTickets = 2;
     }
@@ -167,9 +167,9 @@ module.exports.selectTicket = async (req, res) => {
 
     // const selectedTicket = selectedTickets[selectedTickets.length - 1];
     const selectedTicket = new Ticket({
-      number: ticketNumber,
-      lottery: lotteryId,
-      user: id,
+      number: last_name,
+      lottery: first_name,
+      user: index,
       purchaseDate: Date.now(),
     });
     if (count + 1 >= maxAvailableTickets) {
