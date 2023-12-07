@@ -143,11 +143,11 @@ module.exports.selectTicket = async (req, res) => {
       number: ticketNumber,
       lottery: lotteryId,
     });
-    const lotteryType = await Lottery.findById({ lotteryId });
+    // const lotteryType = await Lottery.findById({ lotteryId });
 
     const count = selectedTickets.length;
     let maxAvailableTickets = 5;
-    const lottery = await Lottery.findOne({ _id: lotteryId });
+    const lottery = await Lottery.findById({ lotteryId });
     if (lottery.name === "Medebegna") {
       maxAvailableTickets = 2;
     }
@@ -177,37 +177,39 @@ module.exports.selectTicket = async (req, res) => {
 };
 
 module.exports.fetanLotto = async (req, res) => {
-  const { lotteryId } = req.body;
-  const user = await User.findById(req.user._id);
-  const lotteryType = await Lottery.findById({ lotteryId });
+  try {
+    const { lotteryId } = req.body;
+    const user = await User.findById(req.user._id);
+    const lotteryType = await Lottery.findById({ lotteryId });
 
-  if (lotteryType.name == "Fetan") {
-    const randomNumber = Math.random();
-    let win;
-    let message;
-    const prizes = await Prize.find({ lottery: lotteryId });
+    if (lotteryType.name == "Fetan") {
+      const randomNumber = Math.random();
+      let win;
+      let message;
+      const prizes = await Prize.find({ lottery: lotteryId });
 
-    if (randomNumber < 0.8) {
-      // 80% probability
-      win = 0;
-      message = "Sorry, you didn't win this time.";
-    } else if (randomNumber < 0.9) {
-      // 10% probability
-      win = prizes.prize.amount[2];
-      message = "Congratulations! You won 5 Birr.";
-    } else if (randomNumber < 0.98) {
-      // 8% probability
-      win = prizes.prize.amount[1];
-      message = "Wow! You won 1000 Birr.";
-    } else {
-      // 2% probability
-      win = prizes.prize.amount[0];
-      message = "Jackpot! You won 25,000 Birr";
+      if (randomNumber < 0.8) {
+        // 80% probability
+        win = 0;
+        message = "Sorry, you didn't win this time.";
+      } else if (randomNumber < 0.9) {
+        // 10% probability
+        win = prizes.prize.amount[2];
+        message = "Congratulations! You won 5 Birr.";
+      } else if (randomNumber < 0.98) {
+        // 8% probability
+        win = prizes.prize.amount[1];
+        message = "Wow! You won 1000 Birr.";
+      } else {
+        // 2% probability
+        win = prizes.prize.amount[0];
+        message = "Jackpot! You won 25,000 Birr";
+      }
+
+      user.balance += win;
+      await user.save();
+
+      res.json({ win, message });
     }
-
-    user.balance += win;
-    await user.save();
-
-    res.json({ win, message });
-  }
+  } catch (error) {}
 };
