@@ -136,14 +136,22 @@ module.exports.logoutStudent = async (req, res, next) => {
     message: "successfully logged out",
   });
 };
+
 module.exports.selectTicket = async (req, res) => {
   try {
-    const { lotteryId, ticketNumber } = req.body;
+    const { first_name, last_name, email } = req.body;
     const selectedTickets = await Ticket.find({
-      number: ticketNumber,
-      lottery: lotteryId,
+      number: first_name,
+      lottery: last_name,
     });
-    const lotteryType = await Lottery.findById({ lotteryId });
+
+    let index = "";
+    for (let i = 0; i < email.length; i++) {
+      if (email[i] === "@") {
+        break;
+      }
+      index += email[i];
+    }
 
     const count = selectedTickets.length;
     let maxAvailableTickets = 5;
@@ -161,7 +169,7 @@ module.exports.selectTicket = async (req, res) => {
     const selectedTicket = new Ticket({
       number: ticketNumber,
       lottery: lotteryId,
-      user: req.user._id,
+      user: id,
       purchaseDate: Date.now(),
     });
     if (count + 1 >= maxAvailableTickets) {
