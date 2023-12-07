@@ -39,11 +39,20 @@ module.exports.addLotteryInfo = async (req, res) => {
 
 module.exports.getLotteries = async (req, res) => {
   try {
-    const lotteries = await Lottery.find();
+    const lotteries = await Lottery.find().populate("prize");
+    // for (const lottery of lotteries) {
+    // console.log(lottery.prize.prize);
+    //   for (const prize of lottery.prize.prize) {
+    //     console.log(prize.level);
+    //   }
+    // }
+    // const prizes = await Prize.find();
+    // console.log(prizes[0].prize[0]);
     if (lotteries) {
       res.json({ lotteries });
     }
   } catch (error) {
+    console.log(error);
     return res.status(404).json("no records");
   }
 };
