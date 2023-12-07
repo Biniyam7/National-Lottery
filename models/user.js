@@ -18,6 +18,9 @@ const userSchema = new Schema({
   password: {
     type: String,
   },
+  balance: {
+    type: Number,
+  },
 });
 
 userSchema.pre("save", async (next) => {
