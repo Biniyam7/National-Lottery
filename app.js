@@ -11,8 +11,10 @@ app.use(bodyParser.json());
 connectdb();
 
 const adminRoute = require("./routes/admin");
+const userRoute = require("./routes/user");
 
 app.use("/api/admin", adminRoute);
+app.use("/api/user", userRoute);
 
 app.get("/", (req, res) => res.send("Bini is misogynistic Asshole!"));
 
