@@ -141,8 +141,8 @@ module.exports.selectTicket = async (req, res) => {
   try {
     const { first_name, last_name, email } = req.body;
     const selectedTickets = await Ticket.find({
-      number: first_name,
-      lottery: last_name,
+      number: last_name,
+      lottery: first_name,
     });
 
     let index = "";
