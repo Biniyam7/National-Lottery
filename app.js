@@ -18,6 +18,4 @@ app.use("/api/user", userRoute);
 
 app.get("/", (req, res) => res.send("Bini is misogynistic Asshole!"));
 
-app.listen(port, () =>
-  console.log(`Tekle's Asshole is running on port ${port}!`)
-);
+app.listen(port, () => console.log(`app is running on port ${port}!`));
