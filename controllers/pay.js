@@ -49,7 +49,7 @@ module.exports.payLottery = async (req, res) => {
       last_name: ticketNumber,
       phone_number: phoneNumber,
       tx_ref: `lotto${randomNum}`,
-      callback_url: "https://941d-196-188-78-148.ngrok.io/api/user/ticket",
+      callback_url: "http://localhost:3000/api/user/ticket",
       return_url: "http://localhost:3000/",
       customization: {
         title: "Lottery",
