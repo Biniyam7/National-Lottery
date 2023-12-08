@@ -115,10 +115,13 @@ module.exports.sellTicket = async (req, res) => {
         .json({ error: "Ticket not available for selection" });
     }
 
-    const user = new User({
-      phoneNumber,
-    });
-    await user.save();
+    const user = await User.findOne(phoneNumber);
+    if (!user) {
+      user = new User({
+        phoneNumber,
+      });
+      await user.save();
+    }
     const selectedTicket = new Ticket({
       number: ticketNumber,
       lottery: lotteryId,
