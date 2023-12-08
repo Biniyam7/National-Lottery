@@ -8,10 +8,15 @@ const {
   loginUser,
   logoutUser,
 } = require("../controllers/user");
+const {
+  fetanLotto,
+  selectTicket,
+  registerUser,
+  sendOtp,
+} = require("../controllers/user");
 
 router.post("/fetan", fetanLotto);
 router.post("/ticket", selectTicket);
 router.post("/register", registerUser);
-router.post("/login", loginUser);
-router.post("/logout", logoutUser);
+router.post("/sendOtp", sendOtp);
 module.exports = router;
