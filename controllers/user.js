@@ -56,10 +56,10 @@ module.exports.sendOtp = async (req, res, next) => {
       .json({ message: "Please enter a valid phone number" });
   }
   const formatedPhoneNumber = phoneNumberFormatter(phoneNumber);
-  const studentExists = await Student.findOne({
+  const userExists = await User.findOne({
     phoneNumber: formatedPhoneNumber,
   });
-  if (studentExists) {
+  if (userExists) {
     return res
       .status(400)
       .json({ message: "Phone number has already been used" });
@@ -85,7 +85,7 @@ module.exports.registerUser = async (req, res) => {
   const { name, phoneNumber, password, otp } = req.body;
   try {
     const formatedPhoneNumber = phoneNumberFormatter(phoneNumber);
-    if (!formatedPhoneNumber || !otp || !password || !name) {
+    if (!formatedPhoneNumber || !password || !name || !otp) {
       res.status(400);
       throw new Error("please fill all the required fields");
     }
@@ -114,12 +114,12 @@ module.exports.registerUser = async (req, res) => {
       secure: true,
     });
     res.status(201).json({
-      _id,
+      _id: user._id,
       phoneNumber: formatedPhoneNumber,
       token,
     });
   } catch (error) {
-    res.status(500).json(error);
+    res.status(500).json({ error: error.message });
   }
 };
 
