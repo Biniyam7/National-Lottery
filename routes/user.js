@@ -7,11 +7,6 @@ const {
   registerUser,
   loginUser,
   logoutUser,
-} = require("../controllers/user");
-const {
-  fetanLotto,
-  selectTicket,
-  registerUser,
   sendOtp,
 } = require("../controllers/user");
 
