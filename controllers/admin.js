@@ -1,6 +1,7 @@
 const Admin = require("../models/admin");
 const Lottery = require("../models/lottery");
 const Prize = require("../models/prize");
+const Vendor = require("../models/vendor");
 
 module.exports.addLotteryInfo = async (req, res) => {
   try {
@@ -50,6 +51,17 @@ module.exports.getLotteries = async (req, res) => {
     // console.log(prizes[0].prize[0]);
     if (lotteries) {
       res.json({ lotteries });
+    }
+  } catch (error) {
+    // console.log(error);
+    return res.status(404).json("no records");
+  }
+};
+module.exports.getVendors = async (req, res) => {
+  try {
+    const vendors = await Vendor.find();
+    if (vendors) {
+      res.json({ vendors });
     }
   } catch (error) {
     console.log(error);
