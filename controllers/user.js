@@ -65,6 +65,7 @@ module.exports.registerUser = async (req, res) => {
       phoneNumber: formatedPhoneNumber,
       password,
     });
+    console.log(user);
     await user.save();
     const token = generateToken(user._id);
     res.cookie("token", token, {
@@ -80,7 +81,7 @@ module.exports.registerUser = async (req, res) => {
       token,
     });
   } catch (error) {
-    res.status(500).json(error);
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -140,6 +141,7 @@ module.exports.logoutUser = async (req, res, next) => {
 module.exports.selectTicket = async (req, res) => {
   try {
     const { first_name, last_name, email } = req.body;
+    console.log("success");
     // const { number, lotteryId, email } = req.body;
     const selectedTickets = await Ticket.find({
       number: last_name,
@@ -156,10 +158,10 @@ module.exports.selectTicket = async (req, res) => {
 
     const count = selectedTickets.length;
     let maxAvailableTickets = 5;
-    const lottery = await Lottery.findById({ first_name });
-    if (lottery.name === "Medebegna") {
-      maxAvailableTickets = 2;
-    }
+    // const lottery = await Lottery.findById({ first_name });
+    // if (lottery.name === "Medebegna") {
+    //   maxAvailableTickets = 2;
+    // }
     if (count >= maxAvailableTickets) {
       return res
         .status(400)

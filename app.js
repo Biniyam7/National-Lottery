@@ -12,9 +12,11 @@ connectdb();
 
 const adminRoute = require("./routes/admin");
 const userRoute = require("./routes/user");
+const payRoute = require("./routes/pay");
 
 app.use("/api/admin", adminRoute);
 app.use("/api/user", userRoute);
+app.use("/api/pay", payRoute);
 
 app.get("/", (req, res) => res.send("Bini is misogynistic Asshole!"));
 
