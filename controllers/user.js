@@ -5,6 +5,7 @@ const phoneNumberFormatter = require("../middlewares/phoneNumberFormatter");
 const Ticket = require("../models/ticket");
 const Lottery = require("../models/lottery");
 const Prize = require("../models/prize");
+const Otp = require("../models/Otp");
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1d" });
@@ -36,7 +37,7 @@ const sendMessage = async (phoneNumber) => {
       },
       body: JSON.stringify(postData),
     });
-    const responseText = await response.text();
+    // const responseText = await response.text();
     if (response.ok) {
       return { success: true, verificationCode: verificationCode.toString() };
     } else {
@@ -47,11 +48,44 @@ const sendMessage = async (phoneNumber) => {
     return { success: false };
   }
 };
+module.exports.sendOtp = async (req, res, next) => {
+  const { phoneNumber } = req.body;
+  if (!phoneNumber || !isValidPhoneNumber(phoneNumber)) {
+    return res
+      .status(400)
+      .json({ message: "Please enter a valid phone number" });
+  }
+  const formatedPhoneNumber = phoneNumberFormatter(phoneNumber);
+  const studentExists = await Student.findOne({
+    phoneNumber: formatedPhoneNumber,
+  });
+  if (studentExists) {
+    return res
+      .status(400)
+      .json({ message: "Phone number has already been used" });
+  }
+  const otpSent = await sendMessage(formatedPhoneNumber);
+  if (otpSent.success) {
+    const { verificationCode } = otpSent;
+    const otp = new Otp({ verificationCode });
+    await otp.save();
+    return res.status(200).json({
+      success: true,
+      message: "SMS sent successfully",
+      phoneNumber: formatedPhoneNumber,
+    });
+  } else {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send verification code via SMS",
+    });
+  }
+};
 module.exports.registerUser = async (req, res) => {
-  const { name, phoneNumber, password } = req.body;
+  const { name, phoneNumber, password, otp } = req.body;
   try {
     const formatedPhoneNumber = phoneNumberFormatter(phoneNumber);
-    if (!formatedPhoneNumber) {
+    if (!formatedPhoneNumber || !otp || !password || !name) {
       res.status(400);
       throw new Error("please fill all the required fields");
     }
@@ -60,6 +94,11 @@ module.exports.registerUser = async (req, res) => {
       res.status(400);
       throw new Error("phone number has already been used");
     }
+    const otpIsCorrect = await Otp.findOne({ verificationCode: otp });
+    if (!otpIsCorrect) {
+      return res.status(401).json({ message: "Invalid OTP" });
+    }
+    await Otp.deleteOne({ verificationCode: otp });
     const user = new User({
       name,
       phoneNumber: formatedPhoneNumber,
