@@ -68,3 +68,23 @@ module.exports.getVendors = async (req, res) => {
     return res.status(404).json("no records");
   }
 };
+module.exports.activateVendor = async (req, res) => {
+  try {
+    const { name } = req.body;
+    const vendor = await Vendor.findOne({ name });
+    if (!vendor) {
+      return res.status(404).json({ message: "vendor not found" });
+    }
+    vendor.status = "active";
+  } catch (error) {}
+};
+module.exports.suspendVendor = async (req, res) => {
+  try {
+    const { name } = req.body;
+    const vendor = await Vendor.findOne({ name });
+    if (!vendor) {
+      return res.status(404).json({ message: "vendor not found" });
+    }
+    vendor.status = "suspended";
+  } catch (error) {}
+};

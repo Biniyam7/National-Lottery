@@ -1,7 +1,7 @@
 const Vendor = require("../models/vendor");
 const jwt = require("jsonwebtoken");
 
-const protect = catchAsync(async (req, res, next) => {
+const protect = async (req, res, next) => {
   const authHeader = req.headers["authorization"];
 
   if (!authHeader) {
@@ -32,5 +32,5 @@ const protect = catchAsync(async (req, res, next) => {
   } catch (error) {
     return res.status(401).json({ error: "Unauthorized: Invalid token" });
   }
-});
+};
 module.exports = protect;
