@@ -35,9 +35,10 @@ const vendorSchema = new Schema({
   status: {
     type: String,
     enum: ["active", "suspended"],
+    default: "active",
   },
 });
-vendorSchema.pre("save", async (next) => {
+vendorSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(this.password, salt);

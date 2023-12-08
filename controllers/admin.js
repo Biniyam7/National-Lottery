@@ -2,6 +2,7 @@ const Admin = require("../models/admin");
 const Lottery = require("../models/lottery");
 const Prize = require("../models/prize");
 const Vendor = require("../models/vendor");
+const phoneNumberFormatter = require("../middlewares/phoneNumberFormatter");
 
 module.exports.addLotteryInfo = async (req, res) => {
   try {
@@ -55,6 +56,37 @@ module.exports.getLotteries = async (req, res) => {
   } catch (error) {
     // console.log(error);
     return res.status(404).json("no records");
+  }
+};
+module.exports.registerVendor = async (req, res) => {
+  try {
+    const { name, phoneNumber, password } = req.body;
+
+    if (!name || !phoneNumber || !password) {
+      return res.status(400).json({ error: "please fill all the fields" });
+    }
+    const formatedPhoneNumber = phoneNumberFormatter(phoneNumber);
+    const vendorExists = await Vendor.findOne({
+      phoneNumber: formatedPhoneNumber,
+    });
+    if (vendorExists) {
+      return res
+        .status(400)
+        .json({ message: "phone number has already been used" });
+    }
+    const vendor = new Vendor({
+      name,
+      phoneNumber: formatedPhoneNumber,
+      password,
+    });
+    await vendor.save();
+    res.status(201).json({
+      _id: vendor._id,
+      phoneNumber: formatedPhoneNumber,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 module.exports.getVendors = async (req, res) => {

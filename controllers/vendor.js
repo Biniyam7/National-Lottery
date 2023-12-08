@@ -3,7 +3,9 @@ const Lottery = require("../models/lottery");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+// const Ticket = require("../models/ticket");
 const phoneNumberFormatter = require("../middlewares/phoneNumberFormatter");
+const Ticket = require("../models/ticket");
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 };
@@ -11,42 +13,6 @@ const isValidPhoneNumber = (phoneNumber) => {
   const phoneRegex =
     /(^\+\s*2\s*5\s*1\s*(9|7)\s*(([0-9]\s*){8}\s*)$)|(^0\s*(9|7)\s*(([0-9]\s*){8})$)/;
   return phoneRegex.test(phoneNumber);
-};
-module.exports.registerVendor = async (req, res) => {
-  try {
-    const { name, phoneNumber, password } = req.body;
-
-    if (!name || !phoneNumber || !password) {
-      return res.status(400).json({ error: "please fill all the fields" });
-    }
-    const formatedPhoneNumber = phoneNumberFormatter(phoneNumber);
-    const vendorExists = await Vendor.findOne({ formatedPhoneNumber });
-    if (vendorExists) {
-      res.status(400);
-      throw new Error("phone number has already been used");
-    }
-    const vendor = new Vendor({
-      name,
-      phoneNumber: formatedPhoneNumber,
-      password,
-    });
-    await vendor.save();
-    const token = generateToken(vendor._id);
-    res.cookie("token", token, {
-      path: "/",
-      httpOnly: true,
-      expires: new Date(Date.now() + 1000 * 86400),
-      sameSite: "none",
-      secure: true,
-    });
-    res.status(201).json({
-      _id,
-      phoneNumber: formatedPhoneNumber,
-      token,
-    });
-  } catch (error) {
-    res.status(500).json(error);
-  }
 };
 
 module.exports.loginVendor = async (req, res) => {
@@ -73,7 +39,7 @@ module.exports.loginVendor = async (req, res) => {
         .status(400)
         .json({ message: "Invalid phone number or password" });
     }
-    const token = generateToken(user._id);
+    const token = generateToken(vendor._id);
     res.cookie("token", token, {
       path: "/",
       httpOnly: true,
@@ -86,7 +52,7 @@ module.exports.loginVendor = async (req, res) => {
       token,
     });
   } catch (error) {
-    res.status(500).json({ error });
+    res.status(500).json({ error: error.message });
   }
 };
 module.exports.logoutVendor = async (req, res, next) => {
@@ -101,47 +67,95 @@ module.exports.logoutVendor = async (req, res, next) => {
     message: "successfully logged out",
   });
 };
+module.exports.resetPassword = async (req, res) => {
+  try {
+    const { oldPassword, password } = req.body;
+    const vendor = await Vendor.findById(req.user._id);
+    if (!vendor) {
+      return res
+        .status(404)
+        .json({ message: "vendor not found please signup" });
+    }
+    if (!oldPassword || !password) {
+      res.status(400).json({ message: "please fill all the required fields" });
+    }
+    const passwordIsCorrect = await bcrypt.compare(
+      oldPassword,
+      vendor.password
+    );
+    if (passwordIsCorrect) {
+      vendor.password = password;
+      await vendor.save();
+      res.status(200).send("Password change successful");
+    } else {
+      res.status(400);
+      throw new Error("Old password is incorrect");
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 module.exports.sellTicket = async (req, res) => {
-  const { ticketNumber, lotteryId, phoneNumber } = req.body;
-  const selectedTickets = await Ticket.find({
-    number: ticketNumber,
-    lottery: lotteryId,
-  });
+  try {
+    const { ticketNumber, lotteryId, phoneNumber } = req.body;
+    const selectedTickets = await Ticket.find({
+      number: ticketNumber,
+      lottery: lotteryId,
+    });
 
-  const count = selectedTickets.length;
-  let maxAvailableTickets = 5;
-  const lottery = await Lottery.findById({ lotteryId });
-  if (lottery.name === "Medebegna") {
-    maxAvailableTickets = 2;
+    const count = selectedTickets.length;
+    let maxAvailableTickets = 5;
+    // const lottery = await Lottery.findById({ lotteryId });
+    // if (lottery.name === "Medebegna") {
+    //   maxAvailableTickets = 2;
+    // }
+    if (count >= maxAvailableTickets) {
+      return res
+        .status(400)
+        .json({ error: "Ticket not available for selection" });
+    }
+
+    const user = new User({
+      phoneNumber,
+    });
+    await user.save();
+    const selectedTicket = new Ticket({
+      number: ticketNumber,
+      lottery: lotteryId,
+      user: user._id,
+      purchaseDate: Date.now(),
+    });
+
+    if (count + 1 >= maxAvailableTickets) {
+      selectedTicket.isAvailable = false;
+    }
+    selectedTicket.vendor = req.user._id;
+    await selectedTicket.save();
+    const seller = await Vendor.findById(req.user._id);
+    seller.ticketsSold.push(selectedTicket._id);
+    seller.balance = +1;
+
+    await seller.save();
+    res
+      .status(200)
+      .json({ message: "Ticket sold successfully", selectedTicket, seller });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
   }
-  if (count >= maxAvailableTickets) {
-    return res
-      .status(400)
-      .json({ error: "Ticket not available for selection" });
+};
+module.exports.soldTickets = async (req, res) => {
+  try {
+    const vendor = await Vendor.findById(req.user._id).populate("ticketsSold");
+    // console.log(vendor);
+    if (!vendor) {
+      return res
+        .status(404)
+        .json({ message: "vendor not found please signup" });
+    }
+    res.status(200).json({ ticketsSold: vendor.ticketsSold });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
   }
-
-  const user = new User({
-    phoneNumber,
-  });
-  await user.save();
-  const selectedTicket = new Ticket({
-    number: ticketNumber,
-    lottery: lotteryId,
-    user: user._id,
-    purchaseDate: Date.now(),
-  });
-
-  if (count + 1 >= maxAvailableTickets) {
-    selectedTicket.isAvailable = false;
-  }
-  selectedTicket.vendor = req.user._id;
-  await selectedTicket.save();
-  const seller = await Vendor.findById(req.user._id);
-  seller.ticketsSold.push(selectedTicket._id);
-  seller.balance = +1;
-
-  await seller.save();
-  res
-    .status(200)
-    .json({ message: "Ticket sold successfully", selectedTicket, seller });
 };
