@@ -6,7 +6,16 @@ const phoneNumberFormatter = require("../middlewares/phoneNumberFormatter");
 
 module.exports.addLotteryInfo = async (req, res) => {
   try {
-    const { name, description, startDate, drawDate, prize, price } = req.body;
+    const {
+      name,
+      description,
+      startDate,
+      drawDate,
+      prize,
+      price,
+      rule,
+      digit,
+    } = req.body;
 
     const lottery = await Lottery.findOne({ name });
     if (!Object.values(Lottery.schema.path("name").enumValues).includes(name)) {
@@ -21,6 +30,8 @@ module.exports.addLotteryInfo = async (req, res) => {
       startDate,
       drawDate,
       price,
+      rule,
+      digit,
     });
 
     const saveLottery = await newLottery.save();

@@ -179,8 +179,9 @@ module.exports.logoutUser = async (req, res, next) => {
 
 module.exports.selectTicket = async (req, res) => {
   try {
-    const { first_name, last_name, email } = req.body;
     console.log("success");
+    const { first_name, last_name, email } = req.body;
+
     // const { number, lotteryId, email } = req.body;
     const selectedTickets = await Ticket.find({
       number: last_name,
@@ -231,8 +232,13 @@ module.exports.fetanLotto = async (req, res) => {
   try {
     const { lotteryId } = req.body;
     const user = await User.findById(req.user._id);
+
     const lotteryType = await Lottery.findById({ lotteryId });
 
+    if (user.balance < 5) {
+      res.status(400);
+      throw new Error("you don't have enough balance please recharge");
+    }
     if (lotteryType.name == "Fetan") {
       const randomNumber = Math.random();
       let win;
