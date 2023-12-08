@@ -5,6 +5,8 @@ const {
   fetanLotto,
   selectTicket,
   registerUser,
+  loginUser,
+  logoutUser,
   sendOtp,
 } = require("../controllers/user");
 
