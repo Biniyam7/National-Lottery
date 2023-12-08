@@ -37,6 +37,13 @@ lotterySchema = new Schema({
     type: Number,
     required: true,
   },
+  digit: {
+    type: Number,
+    required: true,
+  },
+  rule: {
+    type: String,
+  },
 });
 
 const Lottery = mongoose.model("Lottery", lotterySchema);
