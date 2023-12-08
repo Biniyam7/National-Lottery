@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const bcrypt = require("bcryptjs");
 
+const ticketSchema = new Schema({
+  type: Schema.Types.ObjectId,
+  ref: "Ticket",
+});
 const vendorSchema = new Schema({
   name: {
     type: String,
@@ -21,6 +25,11 @@ const vendorSchema = new Schema({
   },
   password: {
     type: String,
+  },
+  ticketsSold: [ticketSchema],
+  status: {
+    type: String,
+    enum: ["active", "suspended"],
   },
 });
 vendorSchema.pre("save", async (next) => {

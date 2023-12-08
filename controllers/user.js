@@ -124,7 +124,7 @@ module.exports.loginUser = async (req, res) => {
   }
 };
 
-module.exports.logoutStudent = async (req, res, next) => {
+module.exports.logoutUser = async (req, res, next) => {
   res.cookie("token", "", {
     path: "/",
     httpOnly: true,
@@ -140,6 +140,7 @@ module.exports.logoutStudent = async (req, res, next) => {
 module.exports.selectTicket = async (req, res) => {
   try {
     const { first_name, last_name, email } = req.body;
+    // const { number, lotteryId, email } = req.body;
     const selectedTickets = await Ticket.find({
       number: last_name,
       lottery: first_name,
@@ -221,47 +222,4 @@ module.exports.fetanLotto = async (req, res) => {
       res.json({ win, message });
     }
   } catch (error) {}
-};
-
-module.exports.sellTicket = async (req, res) => {
-  const { ticketNumber, lotteryId, phoneNumber } = req.body;
-  const selectedTickets = await Ticket.find({
-    number: ticketNumber,
-    lottery: lotteryId,
-  });
-
-  const count = selectedTickets.length;
-  let maxAvailableTickets = 5;
-  const lottery = await Lottery.findById({ first_name });
-  if (lottery.name === "Medebegna") {
-    maxAvailableTickets = 2;
-  }
-  if (count >= maxAvailableTickets) {
-    return res
-      .status(400)
-      .json({ error: "Ticket not available for selection" });
-  }
-
-  const user = new User({
-    phoneNumber,
-  });
-  await user.save();
-  const selectedTicket = new Ticket({
-    number: ticketNumber,
-    lottery: lotteryId,
-    user: user._id,
-    purchaseDate: Date.now(),
-  });
-
-  if (count + 1 >= maxAvailableTickets) {
-    selectedTicket.isAvailable = false;
-  }
-  await selectedTicket.save();
-  const seller = await Vendor.findById(req.user._id);
-  seller.balance = +1;
-
-  await seller.save();
-  res
-    .status(200)
-    .json({ message: "Ticket sold successfully", selectedTicket, seller });
 };

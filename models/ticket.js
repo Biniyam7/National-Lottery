@@ -26,7 +26,11 @@ ticketSchema = new Schema({
   },
   isAvailable: {
     type: Boolean,
-    required: true,
+    // required: true,
+  },
+  vendor: {
+    type: Schema.Types.ObjectId,
+    ref: "Vendor",
   },
 });
 ticketSchema.pre("save", function (next) {

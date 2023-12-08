@@ -31,7 +31,7 @@ module.exports.payLottery = async (req, res) => {
     const customerInfo = {
       amount: 50,
       currency: "ETB",
-      email: id,
+      email: `${id}@gmail.com`,
       first_name: lotteryId,
       last_name: ticketNumber,
       phone_number: phoneNumber,
