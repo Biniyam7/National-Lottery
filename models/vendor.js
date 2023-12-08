@@ -37,6 +37,9 @@ const vendorSchema = new Schema({
     enum: ["active", "suspended"],
     default: "active",
   },
+  commission: {
+    type: Number,
+  },
 });
 vendorSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
