@@ -96,7 +96,7 @@ module.exports.registerVendor = async (req, res) => {
       phoneNumber: formatedPhoneNumber,
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -119,7 +119,9 @@ module.exports.activateVendor = async (req, res) => {
       return res.status(404).json({ message: "vendor not found" });
     }
     vendor.status = "active";
-  } catch (error) {}
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 module.exports.suspendVendor = async (req, res) => {
   try {
@@ -129,5 +131,23 @@ module.exports.suspendVendor = async (req, res) => {
       return res.status(404).json({ message: "vendor not found" });
     }
     vendor.status = "suspended";
-  } catch (error) {}
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+module.exports.getActiveVendors = async (req, res) => {
+  try {
+    const activeVendors = await Vendor.find({ status: "active" });
+    res.json(activeVendors);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+module.exports.getSuspendedVendors = async (req, res) => {
+  try {
+    const suspendedVendors = await Vendor.find({ status: "suspended" });
+    res.json(suspendedVendors);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
