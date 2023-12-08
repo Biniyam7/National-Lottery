@@ -102,7 +102,7 @@ module.exports.sellTicket = async (req, res) => {
       number: ticketNumber,
       lottery: lotteryId,
     });
-
+    const lottery = await Lottery.findById(lotteryId);
     const count = selectedTickets.length;
     let maxAvailableTickets = 5;
     // const lottery = await Lottery.findById({ lotteryId });
@@ -133,8 +133,8 @@ module.exports.sellTicket = async (req, res) => {
     await selectedTicket.save();
     const seller = await Vendor.findById(req.user._id);
     seller.ticketsSold.push(selectedTicket._id);
-    seller.balance = +1;
-
+    seller.balance -= lottery.price;
+    seller.commission += 1;
     await seller.save();
     res
       .status(200)
