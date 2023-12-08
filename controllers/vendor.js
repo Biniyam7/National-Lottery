@@ -106,16 +106,16 @@ module.exports.sellTicket = async (req, res) => {
     const count = selectedTickets.length;
     let maxAvailableTickets = 5;
     // const lottery = await Lottery.findById({ lotteryId });
-    // if (lottery.name === "Medebegna") {
-    //   maxAvailableTickets = 2;
-    // }
+    if (lottery.name === "Medebegna") {
+      maxAvailableTickets = 2;
+    }
     if (count >= maxAvailableTickets) {
       return res
         .status(400)
         .json({ error: "Ticket not available for selection" });
     }
 
-    const user = await User.findOne(phoneNumber);
+    const user = await User.findOne({ phoneNumber });
     if (!user) {
       user = new User({
         phoneNumber,
@@ -137,8 +137,10 @@ module.exports.sellTicket = async (req, res) => {
     const seller = await Vendor.findById(req.user._id);
     seller.ticketsSold.push(selectedTicket._id);
     seller.balance -= lottery.price;
+
     seller.commission += 1;
     await seller.save();
+    // console.log(seller);
     res
       .status(200)
       .json({ message: "Ticket sold successfully", selectedTicket, seller });

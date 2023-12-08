@@ -39,6 +39,7 @@ const vendorSchema = new Schema({
   },
   commission: {
     type: Number,
+    default: 0,
   },
 });
 vendorSchema.pre("save", async function (next) {
