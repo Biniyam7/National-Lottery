@@ -185,9 +185,9 @@ module.exports.selectTicket = async (req, res) => {
     const lottery = await Lottery.findById(lotteryId);
     const ticket = await Ticket.findById(ticketNumber);
 
-    if (!user) {
+    if (!user || user.balance < lottery.price) {
       res.status(400);
-      throw new Error("user does not exist");
+      throw new Error("user does not exist or not enough balance");
     }
     // const { number, lotteryId, email } = req.body;
     const selectedTickets = await Ticket.find({
