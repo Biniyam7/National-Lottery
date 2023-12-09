@@ -2,6 +2,7 @@ const Chapa = require("chapa");
 const Lottery = require("../models/lottery");
 const Ticket = require("../models/ticket");
 const User = require("../models/user");
+const Vendor = require("../models/vendor");
 
 let myChapa = new Chapa("CHASECK_TEST-7mSnUUlCknqZrInKDc9QusA7zy7KNONq");
 
@@ -50,7 +51,7 @@ module.exports.payLottery = async (req, res) => {
       last_name: ticketNumber,
       phone_number: phoneNumber,
       tx_ref: `lotto${randomNum}`,
-      callback_url: "https://8b6e-196-188-78-148.ngrok.io/api/user/ticket",
+      callback_url: "http://localhost:3000/api/user/ticket",
       return_url: "http://localhost:3000/",
       customization: {
         title: "Lottery",
@@ -70,25 +71,33 @@ module.exports.payLottery = async (req, res) => {
 
 module.exports.customerBalance = async (req, res) => {
   const { phoneNumber, amount } = req.body;
+  let id;
   try {
     const userExist = await User.findById(req.user._id);
+    const vendor = await Vendor.findById(req.user._id);
+
+    if (vendor) {
+      id = vendor._id;
+    }
 
     if (userExist) {
       phoneNumber = userExist.phoneNumber;
-    }
-    const user = await User.findOne({ phoneNumber });
-    if (!user) {
-      user = new User({
-        phoneNumber,
-      });
 
-      await user.save();
+      const user = await User.findOne({ phoneNumber });
+      if (!user) {
+        user = new User({
+          phoneNumber,
+        });
+
+        await user.save();
+      }
+      id = user_id;
     }
     const customerInfo = {
       amount: amount,
       currency: "ETB",
       email: "tekle@gmail.com",
-      first_name: user._id,
+      first_name: id,
       last_name: "kassa",
       phone_number: phoneNumber,
       tx_ref: `lotto${randomNum}`,
@@ -114,10 +123,16 @@ module.exports.addBalance = async (req, res) => {
     const { first_name, phone_number, amount } = req.body;
 
     const user = await User.findById({ first_name });
+    const vendor = await Vendor.findById({ first_name });
+    if (user) {
+      user.balance += amount;
+      await user.save();
+    }
+    if (vendor) {
+      vendor.balance += amount;
+      await vendor.save();
+    }
 
-    user.balance += amount;
-
-    await user.save();
     req.status(200).json(user.balance);
   } catch (error) {
     console.error(error);
