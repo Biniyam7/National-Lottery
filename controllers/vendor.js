@@ -14,7 +14,6 @@ const isValidPhoneNumber = (phoneNumber) => {
     /(^\+\s*2\s*5\s*1\s*(9|7)\s*(([0-9]\s*){8}\s*)$)|(^0\s*(9|7)\s*(([0-9]\s*){8})$)/;
   return phoneRegex.test(phoneNumber);
 };
-
 module.exports.loginVendor = async (req, res) => {
   try {
     const { phoneNumber, password } = req.body;
@@ -143,6 +142,9 @@ module.exports.sellTicket = async (req, res) => {
     // selectedTicket.vendor = req.user._id;
     // await selectedTicket.save();
     const seller = await Vendor.findById(req.user._id);
+    if (seller.balance < lottery.price) {
+      return res.status(400).json({ error: "Insufficient balance" });
+    }
     seller.ticketsSold.push(selectedTicket._id);
     seller.balance -= lottery.price;
 
