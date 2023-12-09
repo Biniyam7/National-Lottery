@@ -21,6 +21,12 @@ const userSchema = new Schema({
   balance: {
     type: Number,
   },
+  ticketsBought: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Ticket",
+    },
+  ],
 });
 
 userSchema.pre("save", async function (next) {

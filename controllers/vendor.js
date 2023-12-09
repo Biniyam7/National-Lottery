@@ -103,6 +103,9 @@ module.exports.sellTicket = async (req, res) => {
       lottery: lotteryId,
     });
     const lottery = await Lottery.findById(lotteryId);
+    if (!lottery) {
+      return res.status(400).json({ message: "lottery not found" });
+    }
     const count = selectedTickets.length;
     let maxAvailableTickets = 5;
     // const lottery = await Lottery.findById({ lotteryId });
@@ -120,6 +123,7 @@ module.exports.sellTicket = async (req, res) => {
       user = new User({
         phoneNumber,
       });
+
       await user.save();
     }
     const selectedTicket = new Ticket({
@@ -127,13 +131,17 @@ module.exports.sellTicket = async (req, res) => {
       lottery: lotteryId,
       user: user._id,
       purchaseDate: Date.now(),
+      isAvailable: count + 1 < maxAvailableTickets,
+      vendor: req.user._id,
     });
-
-    if (count + 1 >= maxAvailableTickets) {
-      selectedTicket.isAvailable = false;
-    }
-    selectedTicket.vendor = req.user._id;
     await selectedTicket.save();
+    user.ticketsBought.push(selectedTicket._id);
+    await user.save();
+    // if (count + 1 >= maxAvailableTickets) {
+    //   selectedTicket.isAvailable = false;
+    // }
+    // selectedTicket.vendor = req.user._id;
+    // await selectedTicket.save();
     const seller = await Vendor.findById(req.user._id);
     seller.ticketsSold.push(selectedTicket._id);
     seller.balance -= lottery.price;
@@ -141,9 +149,12 @@ module.exports.sellTicket = async (req, res) => {
     seller.commission += 1;
     await seller.save();
     // console.log(seller);
-    res
-      .status(200)
-      .json({ message: "Ticket sold successfully", selectedTicket, seller });
+    res.status(200).json({
+      message: "Ticket sold successfully",
+      selectedTicket,
+      seller,
+      user,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
