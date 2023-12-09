@@ -180,25 +180,32 @@ module.exports.logoutUser = async (req, res, next) => {
 module.exports.selectTicket = async (req, res) => {
   try {
     console.log("success");
-    const { first_name, last_name, email } = req.body;
+    const { lotteryId, ticketNumber } = req.body;
+    const user = await User.findById(req.user_.id);
+    const lottery = await Lottery.findById(lotteryId);
+    const ticket = await Ticket.findById(ticketNumber);
 
+    if (!user) {
+      res.status(400);
+      throw new Error("user does not exist");
+    }
     // const { number, lotteryId, email } = req.body;
     const selectedTickets = await Ticket.find({
-      number: last_name,
-      lottery: first_name,
+      number: ticketNumber,
+      lottery: lotteryId,
     });
 
-    let index = "";
-    for (let i = 0; i < email.length; i++) {
-      if (email[i] === "@") {
-        break;
-      }
-      index += email[i];
-    }
+    // let index = "";
+    // for (let i = 0; i < email.length; i++) {
+    //   if (email[i] === "@") {
+    //     break;
+    //   }
+    //   index += email[i];
+    // }
 
     const count = selectedTickets.length;
     let maxAvailableTickets = 5;
-    // const lottery = await Lottery.findById({ first_name });
+    // const lottery = await Lottery.findById({ lotteryId });
     // if (lottery.name === "Medebegna") {
     //   maxAvailableTickets = 2;
     // }
@@ -210,11 +217,16 @@ module.exports.selectTicket = async (req, res) => {
 
     // const selectedTicket = selectedTickets[selectedTickets.length - 1];
     const selectedTicket = new Ticket({
-      number: last_name,
-      lottery: first_name,
-      user: index,
+      number: ticketNumber,
+      lottery: lotteryId,
+      user: user._id,
       purchaseDate: Date.now(),
     });
+
+    user.balance -= lottery.price;
+    user.ticketsBought = ticket._id;
+
+    await user.save();
 
     if (count + 1 >= maxAvailableTickets) {
       selectedTicket.isAvailable = false;
