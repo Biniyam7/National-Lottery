@@ -1,6 +1,7 @@
 const Chapa = require("chapa");
 const Lottery = require("../models/lottery");
 const Ticket = require("../models/ticket");
+const User = require("../models/user");
 
 let myChapa = new Chapa("CHASECK_TEST-7mSnUUlCknqZrInKDc9QusA7zy7KNONq");
 
@@ -49,7 +50,7 @@ module.exports.payLottery = async (req, res) => {
       last_name: ticketNumber,
       phone_number: phoneNumber,
       tx_ref: `lotto${randomNum}`,
-      callback_url: "http://localhost:3000/api/user/ticket",
+      callback_url: "https://8b6e-196-188-78-148.ngrok.io/api/user/ticket",
       return_url: "http://localhost:3000/",
       customization: {
         title: "Lottery",
@@ -61,6 +62,63 @@ module.exports.payLottery = async (req, res) => {
 
     res.json(response);
     //res.redirect(response.data.checkout_url)
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+module.exports.customerBalance = async (req, res) => {
+  const { phoneNumber, amount } = req.body;
+  try {
+    const userExist = await User.findById(req.user._id);
+
+    if (userExist) {
+      phoneNumber = userExist.phoneNumber;
+    }
+    const user = await User.findOne({ phoneNumber });
+    if (!user) {
+      user = new User({
+        phoneNumber,
+      });
+
+      await user.save();
+    }
+    const customerInfo = {
+      amount: amount,
+      currency: "ETB",
+      email: "tekle@gmail.com",
+      first_name: user._id,
+      last_name: "kassa",
+      phone_number: phoneNumber,
+      tx_ref: `lotto${randomNum}`,
+      callback_url: "http://localhost:3000/api/pay/addBalance",
+      return_url: "http://localhost:3000/",
+      customization: {
+        title: "Lottery",
+        description: "payment for Lottery",
+      },
+    };
+
+    const response = await myChapa.initialize(customerInfo, { autoRef: true });
+
+    res.json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+module.exports.addBalance = async (req, res) => {
+  try {
+    const { first_name, phone_number, amount } = req.body;
+
+    const user = await User.findById({ first_name });
+
+    user.balance += amount;
+
+    await user.save();
+    req.status(200).json(user.balance);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
